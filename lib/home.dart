@@ -1,112 +1,157 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// ignore: camel_case_types
-class todoView extends StatefulWidget {
-  const todoView({super.key});
+class TodoView extends StatefulWidget {
+  const TodoView({Key? key});
 
   @override
-  State<todoView> createState() => _todoViewState();
+  State<TodoView> createState() => _TodoViewState();
 }
 
-List<Widget> all_list = [];
+List<String> alle = [];
 
-// ignore: camel_case_types
-class _todoViewState extends State<todoView> {
+class _TodoViewState extends State<TodoView> {
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
+
+  TextEditingController textFieldController = TextEditingController();
+  Future<void> save() async {
+    SharedPreferences pfer = await SharedPreferences.getInstance();
+    pfer.setStringList("alles", alle);
+  }
+
+  Future<void> load() async {
+    SharedPreferences pfer = await SharedPreferences.getInstance();
+    List<String> data = pfer.getStringList("alles") ?? [];
+    setState(() {
+      alle = data;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xfff000000),
       appBar: PreferredSize(
-        preferredSize: Size(0, 0),
-        child: AppBar(
-          title: const Text(""),
-        ),
+        preferredSize: Size.fromHeight(0),
+        child: AppBar(),
       ),
       body: Column(
         children: [
-          const SizedBox(
+          SizedBox(
             height: 20,
           ),
-          const Text(
-            "Бүгүнкү иштер",
-            style: TextStyle(
-                fontFamily: "PlayfairDisplay",
-                fontSize: 20,
-                fontWeight: FontWeight.w600,
-                color: Colors.white),
+          const Center(
+            child: Text(
+              "Если не сегодня, то когда",
+              style: TextStyle(
+                fontSize: 20.0,
+                color: Color(0xff144272),
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 20,
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                  alignment: Alignment.centerLeft,
+                  child: GridView.builder(
+                      itemCount: alle.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 9,
+                              crossAxisSpacing: 9),
+                      itemBuilder: (context, index) {
+                        return InkWell(
+                          onDoubleTap: () {
+                            setState(() {
+                              alle.removeAt(index);
+                              save();
+                            });
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: Color(0xff002B5B),
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Column(
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.only(
+                                      left: 30, top: 15, right: 30),
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    alle[index].length <= 10
+                                        ? '${alle[index].toUpperCase()}'
+                                        : '${alle[index].toUpperCase().substring(0, 7)}...',
+                                    style: TextStyle(
+                                        color: Colors.amber, fontSize: 20),
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.only(
+                                      left: 30, top: 5, right: 30),
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    alle[index].length <= 70
+                                        ? "${alle[index]}"
+                                        : alle[index].substring(0, 70) + "...",
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 15),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      })),
+            ),
           ),
           Container(
-            padding: const EdgeInsets.only(left: 20, top: 20, right: 20),
-            alignment: Alignment.centerLeft,
+            padding: EdgeInsets.all(16.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  "#Баардыгы",
-                  style: TextStyle(
-                      fontFamily: "Bitter",
-                      fontSize: 18,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white),
+                Expanded(
+                  child: TextField(
+                    controller: textFieldController,
+                    decoration: InputDecoration(
+                      hintText: "Введите новую заметку",
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
+                  ),
                 ),
                 InkWell(
                   onTap: () {
                     setState(() {
-                      print("object");
-                      all_list.add(
-                        Container(
-                          padding: EdgeInsets.only(left: 20, top: 20),
-                          child: Column(
-                            children: [
-                              Container(
-                                padding: EdgeInsets.only(bottom: 30),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 40,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                          color: Color(0xffD9D9D9),
-                                          borderRadius:
-                                              BorderRadius.circular(100)),
-                                    ),
-                                    const SizedBox(
-                                      width: 15,
-                                    ),
-                                    Text(
-                                      "Жашоо",
-                                      style: TextStyle(
-                                          fontFamily: "Bitter",
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w900,
-                                          color: Colors.white),
-                                    ),
-                                    const SizedBox(
-                                      width: 15,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
+                      if (textFieldController.text != "") {
+                        alle.add(textFieldController.text);
+                        save();
+                        textFieldController.text = "";
+                      } else {
+                        print("Empty");
+                        print(
+                            "Введите новую заметкуВведите новую Введите новую заметкуВведите новую Введите "
+                                .length);
+                      }
                     });
                   },
                   child: Icon(
-                    Icons.add_circle,
-                    color: Colors.white,
-                    size: 30,
+                    Icons.near_me,
+                    size: 35,
+                    color: Color(0xff1D2B53),
                   ),
                 ),
               ],
             ),
-          ),
-          Column(
-            children: all_list,
-          ),
-          const SizedBox(
-            height: 20,
           ),
         ],
       ),

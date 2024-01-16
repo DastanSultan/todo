@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:todo/home.dart';
 
-void main() => runApp(todo());
+void main() => runApp(const Todo());
 
-// ignore: camel_case_types
-class todo extends StatelessWidget {
-  const todo({super.key});
+class Todo extends StatelessWidget {
+  const Todo({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: todoView(),
+      home: TodoView(),
     );
   }
 }
